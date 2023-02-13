@@ -19,6 +19,12 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/components/Editor/Editor.js",
+    "src/pages/query-api-editor/editor.js"
+  ],
   "exclude": ["node_modules"]
 }
