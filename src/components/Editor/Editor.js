@@ -42,7 +42,7 @@ const Editor = (props) => {
 
   const sendMessage = (value) => {
     if (value == undefined) return;
-    innerCode = value.match(/\{([\s\S]*)\}/)[1]
+    const innerCode = value.match(/\{([\s\S]*)\}/)[1]
     // Send a message to other sources
     window.parent.postMessage(innerCode, "*");
     if (window === window.top) {
