@@ -18,27 +18,29 @@ const Editor = _ => {
 
   const handleMessage = (event) => {
     // Handle incoming messages
-    console.log("Received message from widget in react:", event);
+    console.log("message sendr: react app", "Received message from widget in react:", event);
   };
 
   const sendMessage = () => {
-    console.log("Sent message to widget in near.social");
+    console.log("messager sendr: react app", "sending message to widget...");
     // Send a message to other sources
-    window.top.
-      postMessage({ data: "this message is from the react app." }, "*");
+    window.top.postMessage({ data: "this message is from the react app." }, "*");
+    window.top.postMessage("I come with peace1.", "*");
+    window.postMessage("I come with peace2.", "*");
   };
+
+
+
   return <>
     <div style={{ display: "flex", flexDirection: "column" }}>
       <button onClick={sendMessage}>Send Message</button>
-
       <div>
         <MonacoEditor
           height="80vh"
           defaultValue={''}
           defaultLanguage="javascript"
           theme="vs-dark"
-          onChange={text => { console.log('change', text); }}
-        />
+          onChange={text => sendMessage} />
       </div>
     </div></>;
 }
