@@ -24,9 +24,12 @@ const Editor = _ => {
   const sendMessage = () => {
     console.log("messager sendr: react app", "sending message to widget...");
     // Send a message to other sources
-    window.top.postMessage({ data: "this message is from the react app." }, "*");
-    window.top.postMessage("I come with peace1.", "*");
-    window.postMessage("I come with peace2.", "*");
+    window.parent.postMessage("I come with peace2.5.", "*");
+    if (window === window.top) {
+      console.log("not running from iframe")
+    } else {
+      console.log("running from iframe")
+    }
   };
 
 
@@ -40,7 +43,7 @@ const Editor = _ => {
           defaultValue={''}
           defaultLanguage="javascript"
           theme="vs-dark"
-          onChange={text => sendMessage} />
+          onChange={sendMessage} />
       </div>
     </div></>;
 }
