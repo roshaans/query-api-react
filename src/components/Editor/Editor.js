@@ -42,8 +42,9 @@ const Editor = (props) => {
 
   const sendMessage = (value) => {
     if (value == undefined) return;
+    innerCode = value.match(/\{([\s\S]*)\}/)[1]
     // Send a message to other sources
-    window.parent.postMessage(value, "*");
+    window.parent.postMessage(innerCode, "*");
     if (window === window.top) {
       console.log("not running from iframe")
     } else {
@@ -51,7 +52,11 @@ const Editor = (props) => {
     }
   };
 
-
+  let defaultCode = `function getBlock(block, context) {
+    // Add your code here
+    const h = block.header.height;
+    context.set('height', h);
+  }`
 
   return <>
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -59,7 +64,7 @@ const Editor = (props) => {
         <MonacoEditor
           value={value}
           height="80vh"
-          defaultValue={props.value ?? ""}
+          defaultValue={props.value ?? defaultCode}
           defaultLanguage="javascript"
           theme="vs-dark"
           onChange={(text) => setValue(text)}
