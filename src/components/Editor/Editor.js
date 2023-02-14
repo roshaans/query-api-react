@@ -1,30 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
 
 import useStyles from './useStyles';
+import prettier from "prettier";
+import parserBabel from "prettier/parser-babel";
+const Editor = (props) => {
+  const [value, setValue] = useState(props.value);
 
-const Editor = _ => {
   const classes = useStyles();
+  const reformat = (code) => {
+    try {
+      const formattedCode = prettier.format(code, {
+        parser: "babel",
+        plugins: [parserBabel],
+      });
+      setValue(formattedCode);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-  useEffect(() => {
-    // Add a listener for messages from other sources
-    window.addEventListener("message", handleMessage);
-    return () => {
-      // Clean up the listener when the component unmounts
-      window.removeEventListener("message", handleMessage);
-    };
-  }, []);
+  // useEffect(() => {
+  //   console.log("sending message")
+  //   sendMessage(value)
+  // }, [value]);
 
-  const handleMessage = (event) => {
-    // Handle incoming messages
-    console.log("message sendr: react app", "Received message from widget in react:", event);
-  };
+  // useEffect(() => {
+  //   const handleMessage = (event) => {
+  //     // Handle the message received from the parent window
+  //     console.log('Message received:', event.data);
+  //   };
 
-  const sendMessage = () => {
-    console.log("messager sendr: react app", "sending message to widget...");
+  //   window.addEventListener('message', handleMessage);
+
+  //   // Clean up the event listener when the component is unmounted
+  //   return () => {
+  //     window.removeEventListener('message', handleMessage);
+  //   };
+  // }, []);
+
+  const sendMessage = (value) => {
+    if (value == undefined) return;
     // Send a message to other sources
-    window.parent.postMessage("I come with peace2.5.", "*");
+    window.parent.postMessage(value, "*");
     if (window === window.top) {
       console.log("not running from iframe")
     } else {
@@ -36,14 +55,21 @@ const Editor = _ => {
 
   return <>
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <button onClick={sendMessage}>Send Message</button>
       <div>
         <MonacoEditor
+          value={value}
           height="80vh"
-          defaultValue={''}
+          defaultValue={props.value ?? ""}
           defaultLanguage="javascript"
           theme="vs-dark"
-          onChange={sendMessage} />
+          onChange={(text) => setValue(text)}
+          wrapperProps={{
+            onBlur: () => {
+              reformat(value)
+              sendMessage(value)
+            }
+          }}
+        />
       </div>
     </div></>;
 }
