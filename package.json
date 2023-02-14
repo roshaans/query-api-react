@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "social::dev": "cd near.social && yarn run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
