@@ -128,7 +128,7 @@ const Editor = (props) => {
     if (value == undefined) return;
     const innerCode = value.match(/\{([\s\S]*)\}/)[1]
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: innerCode, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexer_name: inputValue, code: innerCode }, from: "react" }, "*");
     if (window === window.top) {
       console.log("not running from iframe")
     } else {
@@ -140,7 +140,7 @@ const Editor = (props) => {
   return <>
     <div style={{ display: "flex", flexDirection: "column", borderRadius: "20px" }}>
       <label>
-        name of the contract:
+        name of the contract to load/create:
         <input type="text" value={inputValue} onChange={handleInputChange} />
       </label>
       <button onClick={handleSubmit}>Submit</button>
