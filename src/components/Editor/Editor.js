@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
 
-import useStyles from './useStyles';
 import prettier from "prettier";
 import parserBabel from "prettier/parser-babel";
-import { Button } from '@material-ui/core';
 import { providers } from "near-api-js";
-
+import { useRouter } from 'next/router'
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 const defaultCode = `function getBlock(block, context) {
   // Add your code here
   const h = block.header.height;
@@ -15,6 +18,7 @@ const defaultCode = `function getBlock(block, context) {
 }`
 
 const format_querried_code = (code) => {
+  code = code.replace(/(?:\\[n])+/g, "\r\n")
   let unformatted_code = `function getBlock(block, context) {
      ${code};
   }`
@@ -31,9 +35,9 @@ const provider = new providers.JsonRpcProvider(
 );
 const contractId = "registry.queryapi.near"
 
+
 const get_indexer_function_details = async (name) => {
   let args = { name };
-  console.log("querying for the code!", args)
 
   const result = await provider.query({
     request_type: "call_function",
@@ -53,20 +57,24 @@ const get_indexer_function_details = async (name) => {
 
 const Editor = (props) => {
   const [value, setValue] = useState(props.value ?? defaultCode);
-  const [inputValue, setInputValue] = useState('');
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.log('Submitted value:', inputValue);
-    // do something with the submitted value
+  const [fullIndexerName, setFullIndexerName] = useState('');
+  const router = useRouter()
+  const { accountId, indexerName } = router.query
+  function handleReload() {
+    if (accountId && indexerName) {
+      setFullIndexerName(`${accountId}/${indexerName}`)
+      get_indexer_function_details(`${accountId}/${indexerName}`).then((code) => {
+        setValue(format_querried_code(code));
+      })
+    }
+  }
 
-    let code = await get_indexer_function_details(inputValue)
-    code = code.replace(/(?:\\[n])+/g, "\r\n")
-    console.log(code, "new code")
-    setValue(format_querried_code(code));
-  };
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
+  useEffect(() => {
+
+    handleReload()
+  }, [accountId, indexerName])
+
+
   useEffect(() => {
     const handleMessage = async (event) => {
       if (!("action" in event.data)) {
@@ -103,7 +111,13 @@ const Editor = (props) => {
       console.log(e);
     }
   }
+  function handleRegister() {
+    // Handle Register button click
 
+    reformat(value)
+    registerFunction(value)
+
+  }
   useEffect(() => {
     window.parent.postMessage({ action: "request_indexer_details", from: "react" }, "*");
   }, []);
@@ -128,36 +142,45 @@ const Editor = (props) => {
     if (value == undefined) return;
     const innerCode = value.match(/\{([\s\S]*)\}/)[1]
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexer_name: inputValue, code: innerCode }, from: "react" }, "*");
-    if (window === window.top) {
-      console.log("not running from iframe")
-    } else {
-      console.log("running from iframe")
-    }
+    console.log("sending message to parent")
+    window.parent.postMessage({ action: "register_function", value: { indexerName: fullIndexerName.replace(" ", "_"), code: innerCode }, from: "react" }, "*");
   };
+  // Define a variable to store the iframe element
 
 
   return <>
-    <div style={{ display: "flex", flexDirection: "column", borderRadius: "20px" }}>
-      <label>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      {/* <label>
         name of the contract to load/create:
-        <input type="text" value={inputValue} onChange={handleInputChange} />
-      </label>
-      <button onClick={handleSubmit}>Submit</button>
+        <input type="text" value={fullIndexerName} onChange={handleInputChange} />
+      </label> */}
+      {/* <button onClick={handleSubmit}>Submit</button> */}
+      <ButtonToolbar className="py-3" aria-label="Actions for Editor">
+        <InputGroup className="px-3" style={{ width: '40%' }}>
+          <InputGroup.Text id="btnGroupAddon">@</InputGroup.Text>
+          <Form.Control
+            type="text"
+            value={fullIndexerName}
+            disabled={true}
+            aria-label="Registered Indexer Name"
+            aria-describedby="btnGroupAddon"
+          />
+        </InputGroup>
+        <ButtonGroup className="px-3 py-1" aria-label="Action Button Group">
+          <Button variant="secondary" className="px-3" onClick={handleReload}> Reload</Button>{' '}
+          <Button variant="primary" className="px-3" onClick={handleRegister}> Save / Register</Button>{' '}
+        </ButtonGroup>
+      </ButtonToolbar>
       <MonacoEditor
         value={value}
         height="80vh"
+        width="100%"
         defaultValue={defaultCode}
         defaultLanguage="javascript"
         theme="vs-dark"
         onChange={(text) => setValue(text)}
       />
-      <Button style={{ height: "5vh", margin: "10px", justifySelf: "flex-end" }} variant="contained" onClick={() => {
-        reformat(value)
-        registerFunction(value)
-      }}>
-        Register Indexer
-      </Button>
+
     </div></>;
 }
 

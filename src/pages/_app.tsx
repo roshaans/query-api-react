@@ -1,10 +1,5 @@
-import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { StyledEngineProvider } from "@mui/material/styles";
+import "bootstrap/dist/css/bootstrap.min.css";
 export default function App({ Component, pageProps }: AppProps) {
-  return (
-    <StyledEngineProvider injectFirst>
-      <Component {...pageProps} />
-    </StyledEngineProvider>
-  );
+  return <Component {...pageProps} />;
 }

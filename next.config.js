@@ -1,8 +1,5 @@
 
 const nextConfig = {
-  transpilePackages: ['@mui/material',
-    '@mui/system',
-    '@mui/icons-material'],
 
 };
 
