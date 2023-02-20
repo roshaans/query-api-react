@@ -25,7 +25,8 @@
     "**/*.ts",
     "**/*.tsx",
     "src/components/Editor/Editor.js",
-    "src/pages/query-api-editor/editor.js"
+    "src/pages/query-api-editor/editor.js",
+    "src/components/CreateNewIndexer/CreateNewIndexer.js"
   ],
   "exclude": ["node_modules"]
 }

@@ -1,13 +1,22 @@
 import React from "react";
 
 import Editor from "../../components/Editor";
+import { withRouter } from 'next/router'
 
-const QueryApiEditorPage = () => {
+const QueryApiEditorPage = ({ router }) => {
+    const { accountId, indexerName } = router.query
+    if (accountId == undefined || indexerName == undefined) {
+        return (
+            <>
+                <h1>404</h1>
+            </>
+        )
+    }
     return (
         <>
-            <Editor />
+            <Editor indexerPath={{ accountId: accountId, indexerName: indexerName }} />
         </>
     );
 };
 
-export default QueryApiEditorPage;
+export default withRouter(QueryApiEditorPage);
