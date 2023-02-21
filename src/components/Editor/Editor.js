@@ -36,7 +36,7 @@ const contractId = "registry.queryapi.near"
 
 
 const get_indexer_function_details = async (name) => {
-  let args = { name };
+  let args = { function_name: name };
 
   const result = await provider.query({
     request_type: "call_function",
