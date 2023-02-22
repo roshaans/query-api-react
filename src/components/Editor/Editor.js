@@ -5,7 +5,7 @@ import MonacoEditor from '@monaco-editor/react';
 import prettier from "prettier";
 import parserBabel from "prettier/parser-babel";
 import { providers } from "near-api-js";
-import { Button, Alert } from 'react-bootstrap';
+import { Button, Alert, Modal } from 'react-bootstrap';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Form from 'react-bootstrap/Form';
@@ -47,6 +47,8 @@ const Editor = (props) => {
   const [accountId, setAccountId] = useState(undefined);
   const [indexerName, setIndexerName] = useState(undefined);
   const [error, setError] = useState(undefined);
+  const [showResetCodeModel, setShowResetCodeModel] = useState(false);
+
   function handleReload(accountId, indexerName) {
     get_indexer_function_details(accountId + "/" + indexerName).then((data) => {
       console.log('data', data)
@@ -58,7 +60,7 @@ const Editor = (props) => {
         console.log(error);
         setError(() => error);
       }
-
+      setShowResetCodeModel(false)
     })
   }
   useEffect(() => {
@@ -84,9 +86,6 @@ const Editor = (props) => {
       setError(() => "Oh snap! We could not format the queried code. The code in the registry contract may be invalid Javascript code. ");
       console.log(error);
     }
-
-
-    return formatted_code;
   }
   useEffect(() => {
     if (accountId !== undefined && indexerName !== undefined) {
@@ -160,7 +159,7 @@ const Editor = (props) => {
               </InputGroup>
             </InputGroup>
             <ButtonGroup className="px-3 pt-3" style={{ width: '50%' }} aria-label="Action Button Group">
-              <Button variant="secondary" className="px-3" onClick={() => handleReload(accountId, indexerName)}> Reload</Button>{' '}
+              <Button variant="secondary" className="px-3" onClick={() => setShowResetCodeModel(true)}> Reset</Button>{' '}
               <Button variant="secondary" className="px-3" onClick={() => handleFormating()}> Format Code</Button>{' '}
 
               <Button variant="primary" className="px-3" onClick={() => handleRegister()}> Save / Register</Button>{' '}
@@ -170,6 +169,23 @@ const Editor = (props) => {
 
 
           </ButtonToolbar></>}
+      <Modal show={showResetCodeModel} onHide={() => setShowResetCodeModel(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Are you sure?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          The changes you have made in the editor will be deleted.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowResetCodeModel(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => handleReload(accountId, indexerName)}>
+            Reload
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {error && <Alert className="px-3 pt-3" variant="danger">
         {error}
       </Alert>}
