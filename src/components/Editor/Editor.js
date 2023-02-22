@@ -58,6 +58,7 @@ const Editor = (props) => {
       setIndexerName(props.indexerPath.indexerName);
     }
   }, []);
+
   const format_querried_code = (code) => {
     code = code.replace(/(?:\\[n])+/g, "\r\n")
     let unformatted_code = `function getBlock(block, context) {
@@ -90,9 +91,11 @@ const Editor = (props) => {
         parser: "babel",
         plugins: [parserBabel],
       });
+      setError(() => undefined);
       setValue(formattedCode);
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      setError(() => error);
+      console.log(error);
     }
   }
   function handleFormating() {
