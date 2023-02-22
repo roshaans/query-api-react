@@ -5,7 +5,7 @@ import MonacoEditor from '@monaco-editor/react';
 import prettier from "prettier";
 import parserBabel from "prettier/parser-babel";
 import { providers } from "near-api-js";
-import { Button } from 'react-bootstrap';
+import { Button, Alert } from 'react-bootstrap';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Form from 'react-bootstrap/Form';
@@ -16,19 +16,7 @@ const defaultCode = `function getBlock(block, context) {
   context.set('height', h);
 }`
 
-const format_querried_code = (code) => {
-  if (code == undefined) return defaultCode;
-  code = code.replace(/(?:\\[n])+/g, "\r\n")
-  let unformatted_code = `function getBlock(block, context) {
-     ${code};
-  }`
-  let formatted_code = prettier.format(unformatted_code, {
-    parser: "babel",
-    plugins: [parserBabel],
-  });
 
-  return formatted_code;
-}
 //network config (replace testnet with mainnet or betanet)
 const provider = new providers.JsonRpcProvider(
   "https://archival-rpc.mainnet.near.org"
@@ -58,6 +46,7 @@ const Editor = (props) => {
   const [value, setValue] = useState(defaultCode);
   const [accountId, setAccountId] = useState(undefined);
   const [indexerName, setIndexerName] = useState(undefined);
+  const [error, setError] = useState(undefined);
   function handleReload(accountId, indexerName) {
     get_indexer_function_details(accountId + "/" + indexerName).then((data) => {
       setValue(format_querried_code(data.code));
@@ -69,7 +58,26 @@ const Editor = (props) => {
       setIndexerName(props.indexerPath.indexerName);
     }
   }, []);
+  const format_querried_code = (code) => {
+    code = code.replace(/(?:\\[n])+/g, "\r\n")
+    let unformatted_code = `function getBlock(block, context) {
+       ${code};
+    }`
+    try {
+      let formatted_code = prettier.format(unformatted_code, {
+        parser: "babel",
+        plugins: [parserBabel],
+      });
+      setError(() => undefined);
+      return formatted_code;
+    } catch (error) {
+      setError(() => error);
+      console.log(error);
+    }
 
+
+    return formatted_code;
+  }
   useEffect(() => {
     if (accountId !== undefined && indexerName !== undefined) {
       handleReload(accountId, indexerName)
@@ -112,6 +120,9 @@ const Editor = (props) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <Alert variant="danger">
+        {error}
+      </Alert>
       {
         accountId && indexerName && <>
           <ButtonToolbar className="pt-3 pb-1 flex-col" aria-label="Actions for Editor">
