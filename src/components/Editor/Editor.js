@@ -59,8 +59,7 @@ const Editor = (props) => {
   const [accountId, setAccountId] = useState(undefined);
   const [indexerName, setIndexerName] = useState(undefined);
   function handleReload(accountId, indexerName) {
-    console.log("Reloading", accountId, indexerName)
-    get_indexer_function_details(indexerName).then((data) => {
+    get_indexer_function_details(accountId + "/" + indexerName).then((data) => {
       setValue(format_querried_code(data.code));
     })
   }
