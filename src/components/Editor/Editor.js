@@ -49,7 +49,15 @@ const Editor = (props) => {
   const [error, setError] = useState(undefined);
   function handleReload(accountId, indexerName) {
     get_indexer_function_details(accountId + "/" + indexerName).then((data) => {
-      setValue(format_querried_code(data.code));
+      try {
+        let formatted_code = format_querried_code(data.code);
+        console.log('formatted_code', formatted_code)
+        setValue(formatted_code);
+      } catch (error) {
+        console.log(error);
+        setError(() => error);
+      }
+
     })
   }
   useEffect(() => {
@@ -72,7 +80,7 @@ const Editor = (props) => {
       setError(() => undefined);
       return formatted_code;
     } catch (error) {
-      setError(() => error);
+      setError(() => "Oh snap! We could not format the queried code. The code in the registry contract may be invalid Javascript code. ");
       console.log(error);
     }
 
@@ -94,8 +102,8 @@ const Editor = (props) => {
       setError(() => undefined);
       setValue(formattedCode);
     } catch (error) {
-      setError(() => error);
-      console.log(error);
+      setError(() => "Oh snap! We could not format your code. Make sure it is proper Javascript code.");
+      console.log(error, "errorasdf");
     }
   }
   function handleFormating() {
@@ -115,17 +123,15 @@ const Editor = (props) => {
 
   const registerFunction = (value) => {
     if (value == undefined) return;
+    if (error !== undefined) setError(() => "Before registering your code, please ensure your javascript code is valid.");
     const innerCode = value.match(/\{([\s\S]*)\}/)[1]
-    console.log(innerCode, "this is the indexer code")
     // Send a message to other sources
     window.parent.postMessage({ action: "register_function", value: { indexerName: indexerName.replace(" ", "_"), code: innerCode }, from: "react" }, "*");
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      <Alert variant="danger">
-        {error}
-      </Alert>
+
       {
         accountId && indexerName && <>
           <ButtonToolbar className="pt-3 pb-1 flex-col" aria-label="Actions for Editor">
@@ -163,6 +169,9 @@ const Editor = (props) => {
 
 
           </ButtonToolbar></>}
+      {error && <Alert className="px-3 pt-3" variant="danger">
+        {error}
+      </Alert>}
       <MonacoEditor
         value={value}
         height="80vh"
