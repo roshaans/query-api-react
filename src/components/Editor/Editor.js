@@ -87,6 +87,11 @@ const Editor = (props) => {
       console.log(e);
     }
   }
+  function handleFormating() {
+    // Handle Register button click
+    reformat(value)
+  }
+
   function handleRegister() {
     // Handle Register button click
     reformat(value)
@@ -100,6 +105,7 @@ const Editor = (props) => {
   const registerFunction = (value) => {
     if (value == undefined) return;
     const innerCode = value.match(/\{([\s\S]*)\}/)[1]
+    console.log(innerCode, "this is the indexer code")
     // Send a message to other sources
     window.parent.postMessage({ action: "register_function", value: { indexerName: indexerName.replace(" ", "_"), code: innerCode }, from: "react" }, "*");
   };
@@ -108,21 +114,36 @@ const Editor = (props) => {
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
       {
         accountId && indexerName && <>
-          <ButtonToolbar className="py-3" aria-label="Actions for Editor">
-            <InputGroup className="px-3" style={{ width: '40%' }}>
-              <InputGroup.Text id="btnGroupAddon">Indexer Name: </InputGroup.Text>
-              <Form.Control
-                type="text"
-                value={indexerName}
-                disabled={true}
-                aria-label="Registered Indexer Name"
-                aria-describedby="btnGroupAddon"
-              />
-            </InputGroup>
+          <ButtonToolbar className="pt-3 pb-1 flex-col" aria-label="Actions for Editor">
+            <InputGroup className="px-3" style={{ width: '100%' }}>
+              <InputGroup style={{ width: '30%' }}>
+                <InputGroup.Text id="btnGroupAddon">AccountID:</InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  value={accountId}
+                  disabled={true}
+                  aria-label="Registered Indexer Name"
+                  aria-describedby="btnGroupAddon"
+                />
+              </InputGroup>
+              <InputGroup className="px-3" style={{ width: '40%' }}>
 
-            <ButtonGroup className="px-3 py-1" aria-label="Action Button Group">
+                <InputGroup.Text id="btnGroupAddon">Indexer Name: </InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  value={indexerName}
+                  disabled={true}
+                  aria-label="Registered Indexer Name"
+                  aria-describedby="btnGroupAddon"
+                />
+              </InputGroup>
+            </InputGroup>
+            <ButtonGroup className="px-3 pt-3" style={{ width: '50%' }} aria-label="Action Button Group">
               <Button variant="secondary" className="px-3" onClick={() => handleReload(accountId, indexerName)}> Reload</Button>{' '}
+              <Button variant="secondary" className="px-3" onClick={() => handleFormating()}> Format Code</Button>{' '}
+
               <Button variant="primary" className="px-3" onClick={() => handleRegister()}> Save / Register</Button>{' '}
+
             </ButtonGroup>
 
 
