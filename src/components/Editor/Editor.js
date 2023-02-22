@@ -17,6 +17,7 @@ const defaultCode = `function getBlock(block, context) {
 }`
 
 const format_querried_code = (code) => {
+  if (code == undefined) return defaultCode;
   code = code.replace(/(?:\\[n])+/g, "\r\n")
   let unformatted_code = `function getBlock(block, context) {
      ${code};
@@ -55,14 +56,12 @@ const get_indexer_function_details = async (name) => {
 
 const Editor = (props) => {
   const [value, setValue] = useState(defaultCode);
-  const [fullIndexerName, setFullIndexerName] = useState('');
   const [accountId, setAccountId] = useState(undefined);
   const [indexerName, setIndexerName] = useState(undefined);
   function handleReload(accountId, indexerName) {
-
-    setFullIndexerName(`${accountId}/${indexerName}`)
-    get_indexer_function_details(`${accountId}/${indexerName}`).then((code) => {
-      setValue(format_querried_code(code));
+    console.log("Reloading", accountId, indexerName)
+    get_indexer_function_details(indexerName).then((data) => {
+      setValue(format_querried_code(data.code));
     })
   }
   useEffect(() => {
@@ -103,7 +102,7 @@ const Editor = (props) => {
     if (value == undefined) return;
     const innerCode = value.match(/\{([\s\S]*)\}/)[1]
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: fullIndexerName.replace(" ", "_"), code: innerCode }, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerName.replace(" ", "_"), code: innerCode }, from: "react" }, "*");
   };
 
   return (
@@ -115,7 +114,7 @@ const Editor = (props) => {
               <InputGroup.Text id="btnGroupAddon">Indexer Name: </InputGroup.Text>
               <Form.Control
                 type="text"
-                value={fullIndexerName}
+                value={indexerName}
                 disabled={true}
                 aria-label="Registered Indexer Name"
                 aria-describedby="btnGroupAddon"
