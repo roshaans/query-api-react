@@ -49,6 +49,7 @@ const Editor = (props) => {
   const [error, setError] = useState(undefined);
   function handleReload(accountId, indexerName) {
     get_indexer_function_details(accountId + "/" + indexerName).then((data) => {
+      console.log('data', data)
       try {
         let formatted_code = format_querried_code(data.code);
         console.log('formatted_code', formatted_code)
