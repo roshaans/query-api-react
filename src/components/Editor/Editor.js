@@ -54,11 +54,12 @@ const Editor = (props) => {
       console.log('data', data)
       try {
         let formatted_code = format_querried_code(data.code);
-        console.log('formatted_code', formatted_code)
+        // console.log('formatted_code', formatted_code)
         setValue(formatted_code);
-      } catch (error) {
+      }
+      catch (error) {
         console.log(error);
-        setError(() => error);
+        setError(() => "An error occured while trying to query the code");
       }
       setShowResetCodeModel(false)
     })
@@ -75,17 +76,18 @@ const Editor = (props) => {
     let unformatted_code = `function getBlock(block, context) {
        ${code};
     }`
-    try {
-      let formatted_code = prettier.format(unformatted_code, {
-        parser: "babel",
-        plugins: [parserBabel],
-      });
-      setError(() => undefined);
-      return formatted_code;
-    } catch (error) {
-      setError(() => "Oh snap! We could not format the queried code. The code in the registry contract may be invalid Javascript code. ");
-      console.log(error);
-    }
+    return unformatted_code;
+    // try {
+    //   let formatted_code = prettier.format(unformatted_code, {
+    //     parser: "babel",
+    //     plugins: [parserBabel],
+    //   });
+    //   setError(() => undefined);
+    //   return formatted_code;
+    // } catch (error) {
+    //   setError(() => "Oh snap! We could not format the queried code. The code in the registry contract may be invalid Javascript code. ");
+    //   console.log(error);
+    // }
   }
   useEffect(() => {
     if (accountId !== undefined && indexerName !== undefined) {
@@ -189,16 +191,17 @@ const Editor = (props) => {
       {error && <Alert className="px-3 pt-3" variant="danger">
         {error}
       </Alert>}
-      <MonacoEditor
-        value={value}
-        height="80vh"
-        width="100%"
-        defaultValue={defaultCode}
-        defaultLanguage="javascript"
-        theme="vs-dark"
-        onChange={(text) => setValue(text)}
-      />
-
+      <div className="px-3 pt-3">
+        <MonacoEditor
+          value={value}
+          height="80vh"
+          width="100%"
+          defaultValue={defaultCode}
+          defaultLanguage="javascript"
+          theme="vs-dark"
+          onChange={(text) => setValue(text)}
+        />
+      </div>
     </div>);
 }
 

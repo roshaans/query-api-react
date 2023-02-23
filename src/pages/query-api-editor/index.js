@@ -8,7 +8,7 @@ const QueryApiEditorPage = ({ router }) => {
     if (accountId == undefined || indexerName == undefined) {
         return (
             <>
-                <h1>404</h1>
+                Both accountId and IndexerName need to be specified in the URL
             </>
         )
     }

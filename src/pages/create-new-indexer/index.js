@@ -11,7 +11,7 @@ const CreateNewIndexerPage = ({ router }) => {
     if (accountId == undefined) {
         return (
             <>
-                <h1>404</h1>
+                <h1>AccountId needs to be specified in the URL </h1>
             </>
         )
     }
