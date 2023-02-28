@@ -3,6 +3,7 @@ import React from "react";
 
 import CreateNewIndexer from "../../components/CreateNewIndexer";
 import { withRouter } from 'next/router'
+import { Alert } from 'react-bootstrap';
 
 
 const CreateNewIndexerPage = ({ router }) => {
@@ -11,7 +12,9 @@ const CreateNewIndexerPage = ({ router }) => {
     if (accountId == undefined) {
         return (
             <>
-                <h1>AccountId needs to be specified in the URL </h1>
+                <Alert className="px-3 pt-3" variant="info">
+                    AccountId needs to be specified in the URL
+                </Alert>
             </>
         )
     }
