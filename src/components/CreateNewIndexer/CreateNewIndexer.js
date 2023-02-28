@@ -12,14 +12,14 @@ const CreateNewIndexer = (props) => {
 
     return (
         <>
-            <div className="container">
-                <Editor
-                    accountId={props.accountId}
-                    options={{ create_new_indexer: true }}
-                    actionButtonText="Create New Indexer"
-                    theme="vs-dark"
-                />
-            </div>
+            {/* <div className="container"> */}
+            <Editor
+                accountId={props.accountId}
+                options={{ create_new_indexer: true }}
+                actionButtonText="Create New Indexer"
+                theme="vs-dark"
+            />
+            {/* </div> */}
 
         </>
 

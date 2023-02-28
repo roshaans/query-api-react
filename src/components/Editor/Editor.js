@@ -141,6 +141,7 @@ const Editor = ({
     if (options?.create_new_indexer == true) {
       setIndexingCode(defaultCode);
       setSchema(defaultSchema);
+      setShowResetCodeModel(false)
       return
     }
     const data = await get_indexer_function_details(accountId + "/" + indexerName)
