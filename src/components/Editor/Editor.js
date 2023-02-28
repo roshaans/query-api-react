@@ -83,7 +83,7 @@ const Editor = ({
   const [schema, setSchema] = useState(defaultSchema);
   const [indexerNameField, setIndexerNameField] = useState(indexerName ?? "");
   const [selectedOption, setSelectedOption] = useState('latestBlockHeight');
-  const [blockHeight, setBlockHeight] = useState(0);
+  const [blockHeight, setBlockHeight] = useState(86256307);
 
   useEffect(() => {
     setBlockHeight(getLatestBlockHeight())
@@ -121,9 +121,9 @@ const Editor = ({
   }
 
   const registerFunction = async () => {
-    if (selectedOption === "latestBlockHeight") {
-      setBlockHeight(await getLatestBlockHeight())
-    }
+    // if (selectedOption === "latestBlockHeight") {
+    //   setBlockHeight(await getLatestBlockHeight())
+    // }
 
     let formatted_schema = checkSQLSchemaFormatting();
     const innderCode = indexingCode.match(/\{([\s\S]*)\}/)[1]
