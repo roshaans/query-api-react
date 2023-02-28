@@ -126,7 +126,7 @@ const Editor = ({
     }
 
     let formatted_schema = checkSQLSchemaFormatting();
-
+    const innderCode = indexingCode.match(/\{([\s\S]*)\}/)[1]
     if (indexerNameField == undefined || formatted_schema == undefined) {
       setError(() => "Please check your SQL schema formatting and specify an Indexer Name");
       return
@@ -134,7 +134,7 @@ const Editor = ({
     setError(() => undefined);
 
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: indexingCode, schema: formatted_schema, blockHeight: blockHeight }, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innderCode, schema: formatted_schema, blockHeight: blockHeight }, from: "react" }, "*");
   };
 
   const handleReload = useCallback(async () => {
