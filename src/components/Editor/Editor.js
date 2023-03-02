@@ -129,7 +129,7 @@ const Editor = ({
     // }
 
     let formatted_schema = checkSQLSchemaFormatting();
-    const innderCode = indexingCode.match(/\{([\s\S]*)\}/)[1]
+    const innerCode = indexingCode.match(/\{([\s\S]*)\}/)[1]
     if (indexerNameField == undefined || formatted_schema == undefined) {
       setError(() => "Please check your SQL schema formatting and specify an Indexer Name");
       return
@@ -137,12 +137,12 @@ const Editor = ({
     setError(() => undefined);
 
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innderCode, schema: formatted_schema }, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innerCode, schema: formatted_schema }, from: "react" }, "*");
   };
 
   const handleReload = useCallback(async () => {
     if (options?.create_new_indexer == true) {
-      setIndexingCode(defaultCode);
+      // setIndexingCode(defaultCode);
       setSchema(defaultSchema);
       setShowResetCodeModel(false)
       return
