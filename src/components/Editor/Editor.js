@@ -314,8 +314,8 @@ const Editor = ({
         <button disabled={fileName === "indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}
         >indexingLogic.js</button>
         <button disabled={fileName === "schema.sql"} onClick={() => setFileName("schema.sql")}>schema.sql</button>
-        <div className="container-fluid mt-1">
-          <div className="mb-3">
+        {/* <div className="container-fluid mt-1"> */}
+        {/* <div className="mb-3">
             <Nav
               variant="pills mb-1"
               onSelect={(key) => {
@@ -334,18 +334,18 @@ const Editor = ({
               })}
 
             </Nav>
-          </div>
-          <MonacoEditor
-            value={fileName == "indexingLogic.js" ? indexingCode : schema}
-            height="80vh"
-            width="100%"
-            // defaultValue={fileName == "indexingLogic.js" ? defaultCode : defaultSchema}
-            defaultLanguage={fileName == "indexingLogic.js" ? "javascript" : "sql"}
-            theme="vs-dark"
-            onChange={(text) => fileName === "indexingLogic.js" ? () => setIndexingCode(text) : () => setSchema(text)}
-            options={{ ...options, readOnly: fileName === "indexingLogic.js" ? false : true }}
-          />
-        </div>
+          </div> */}
+        <MonacoEditor
+          value={fileName == "indexingLogic.js" ? indexingCode : schema}
+          height="80vh"
+          width="100%"
+          // defaultValue={fileName == "indexingLogic.js" ? defaultCode : defaultSchema}
+          defaultLanguage={fileName == "indexingLogic.js" ? "javascript" : "sql"}
+          theme="vs-dark"
+          onChange={(text) => fileName === "indexingLogic.js" ? () => setIndexingCode(text) : () => setSchema(text)}
+          options={{ ...options, readOnly: fileName === "indexingLogic.js" ? false : true }}
+        />
+        {/* </div> */}
         {fileName == "indexingLogic.js" &&
           <MonacoEditor
             value={indexingCode}
