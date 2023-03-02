@@ -123,7 +123,7 @@ const Editor = ({
     }
   }
 
-  const registerFunction = async () => {
+  const registerFunction = () => {
     // if (selectedOption === "latestBlockHeight") {
     //   setBlockHeight(await getLatestBlockHeight())
     // }
