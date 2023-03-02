@@ -11,6 +11,8 @@ import {
   ButtonToolbar,
   Form,
   InputGroup,
+  ToggleButtonGroup,
+  ToggleButton,
   Nav,
 } from 'react-bootstrap';
 
@@ -312,9 +314,17 @@ const Editor = ({
         {error}
       </Alert>}
       <div className="px-3 pt-3">
-        <button disabled={fileName === "indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}
-        >indexingLogic.js</button>
-        <button disabled={fileName === "schema.sql"} onClick={() => setFileName("schema.sql")}>schema.sql</button>
+        <ToggleButtonGroup type="radio" name="options" defaultValue={"indexingLogic.js"}
+
+        >
+          <ToggleButton id="tbg-radio-1" value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
+            indexingLogic.js
+          </ToggleButton>
+          <ToggleButton id="tbg-radio-2" value={"schema.sql"} onClick={() => setFileName("schema.sql")}>
+            schema.sql
+          </ToggleButton>
+        </ToggleButtonGroup>
+
         {fileName == "indexingLogic.js" &&
           <MonacoEditor
             value={indexingCode}
