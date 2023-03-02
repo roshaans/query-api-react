@@ -318,7 +318,7 @@ const Editor = ({
         {fileName == "indexingLogic.js" &&
           <MonacoEditor
             value={indexingCode}
-            height="80vh"
+            height="50vh"
             width="100%"
             defaultValue={defaultCode}
             defaultLanguage="javascript"
@@ -329,7 +329,7 @@ const Editor = ({
         {fileName == "schema.sql" &&
           <MonacoEditor
             value={schema}
-            height="80vh"
+            height="50vh"
             width="100%"
             defaultValue={defaultSchema}
             defaultLanguage="sql"
