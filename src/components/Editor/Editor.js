@@ -83,22 +83,25 @@ const Editor = ({
   const [schema, setSchema] = useState(defaultSchema);
   const [indexerNameField, setIndexerNameField] = useState(indexerName ?? "");
   const [selectedOption, setSelectedOption] = useState('latestBlockHeight');
-  const [blockHeight, setBlockHeight] = useState(86256307);
+  // const [blockHeight, setBlockHeight] = useState(86256307);
 
-  useEffect(() => {
-    setBlockHeight(getLatestBlockHeight())
-  }, [])
+  // useEffect(() => {
+  //   console.log("indexerName", indexerName)
+  //   console.log("accountId", accountId)
+  //   console.log("----")
+  // setBlockHeight(getLatestBlockHeight())
+  // }, [])
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
   }
-  useEffect(() => {
-    console.log(indexingCode, 'indexingCode')
-  }, [indexingCode])
+  // useEffect(() => {
+  //   console.log(indexingCode, 'indexingCode')
+  // }, [indexingCode])
 
-  useEffect(() => {
-    console.log(schema, 'schema')
-  }, [schema])
+  // useEffect(() => {
+  //   console.log(schema, 'schema')
+  // }, [schema])
 
   const format_SQL_code = (schema) => {
     return prettier.format(schema, {
@@ -134,7 +137,7 @@ const Editor = ({
     setError(() => undefined);
 
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innderCode, schema: formatted_schema, blockHeight: blockHeight }, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innderCode, schema: formatted_schema }, from: "react" }, "*");
   };
 
   const handleReload = useCallback(async () => {
@@ -144,7 +147,7 @@ const Editor = ({
       setShowResetCodeModel(false)
       return
     }
-    const data = await get_indexer_function_details(accountId + "/" + indexerName)
+    const data = await get_indexer_function_details(accountId + "/" + indexerNameField)
     if (data == null) {
       setIndexingCode(defaultCode);
       setSchema(defaultSchema);
@@ -166,7 +169,7 @@ const Editor = ({
       }
     }
     setShowResetCodeModel(false)
-  }, [accountId, indexerName, onLoadErrorText, options?.create_new_indexer])
+  }, [accountId, indexerNameField, onLoadErrorText, options?.create_new_indexer])
 
   const format_querried_code = (code) => {
     code = code.replace(/(?:\\[n])+/g, "\r\n")
@@ -230,7 +233,7 @@ const Editor = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      {loading && <h2> LOADING...</h2>}
+      {/* {loading && <h2> LOADING...</h2>} */}
       {
         <>
           <ButtonToolbar className="pt-3 pb-1 flex-col" aria-label="Actions for Editor">
@@ -265,7 +268,7 @@ const Editor = ({
                   onChange={handleOptionChange} aria-label="Checkbox for following text input" />
                 <InputGroup.Text>From Latest Block Height: </InputGroup.Text>
               </InputGroup>
-              <InputGroup className="px-3 pt-3">
+              {/* <InputGroup className="px-3 pt-3">
                 <InputGroup.Checkbox value="specificBlockHeight" checked={selectedOption === "specificBlockHeight"}
                   onChange={handleOptionChange} aria-label="Checkbox for following text input" />
                 <InputGroup.Text>Specific Block Height</InputGroup.Text>
@@ -274,7 +277,8 @@ const Editor = ({
                   value={blockHeight}
                   onChange={(e) => setBlockHeight(e.target.value)}
                   aria-label="Text input with checkbox" />
-              </InputGroup>
+              </InputGroup> */}
+
             </>}
             <ButtonGroup className="px-3 pt-3" style={{ width: '50%' }} aria-label="Action Button Group">
               <Button variant="secondary" className="px-3" onClick={() => setShowResetCodeModel(true)}> Reset</Button>{' '}
@@ -310,7 +314,7 @@ const Editor = ({
         <button disabled={fileName === "indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}
         >indexingLogic.js</button>
         <button disabled={fileName === "schema.sql"} onClick={() => setFileName("schema.sql")}>schema.sql</button>
-        {/* <div className="container-fluid mt-1">
+        <div className="container-fluid mt-1">
           <div className="mb-3">
             <Nav
               variant="pills mb-1"
@@ -331,7 +335,7 @@ const Editor = ({
 
             </Nav>
           </div>
-            <MonacoEditor
+          <MonacoEditor
             value={fileName == "indexingLogic.js" ? indexingCode : schema}
             height="80vh"
             width="100%"
@@ -341,7 +345,7 @@ const Editor = ({
             onChange={(text) => fileName === "indexingLogic.js" ? () => setIndexingCode(text) : () => setSchema(text)}
             options={{ ...options, readOnly: fileName === "indexingLogic.js" ? false : true }}
           />
-        </div> */}
+        </div>
         {fileName == "indexingLogic.js" &&
           <MonacoEditor
             value={indexingCode}
