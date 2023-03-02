@@ -135,6 +135,8 @@ const Editor = ({
       return
     }
     setError(() => undefined);
+    console.log("formatted_schema", formatted_schema)
+    console.log("indexer code", indexingCode)
 
     // Send a message to other sources
     window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innerCode, schema: formatted_schema }, from: "react" }, "*");
@@ -314,38 +316,6 @@ const Editor = ({
         <button disabled={fileName === "indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}
         >indexingLogic.js</button>
         <button disabled={fileName === "schema.sql"} onClick={() => setFileName("schema.sql")}>schema.sql</button>
-        {/* <div className="container-fluid mt-1"> */}
-        {/* <div className="mb-3">
-            <Nav
-              variant="pills mb-1"
-              onSelect={(key) => {
-                console.log(key, "key")
-                openFile(JSON.parse(key))
-              }}
-            >
-              {Object.entries(files).map((key, file) => {
-                return (
-                  <Nav.Item key={key}>
-                    <Nav.Link className="text-decoration-none" eventKey={key}>
-                      {file.name}
-                    </Nav.Link>
-                  </Nav.Item>
-                );
-              })}
-
-            </Nav>
-          </div> */}
-        <MonacoEditor
-          value={fileName == "indexingLogic.js" ? indexingCode : schema}
-          height="80vh"
-          width="100%"
-          // defaultValue={fileName == "indexingLogic.js" ? defaultCode : defaultSchema}
-          defaultLanguage={fileName == "indexingLogic.js" ? "javascript" : "sql"}
-          theme="vs-dark"
-          onChange={(text) => fileName === "indexingLogic.js" ? () => setIndexingCode(text) : () => setSchema(text)}
-          options={{ ...options, readOnly: fileName === "indexingLogic.js" ? false : true }}
-        />
-        {/* </div> */}
         {fileName == "indexingLogic.js" &&
           <MonacoEditor
             value={indexingCode}
