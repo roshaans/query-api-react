@@ -113,7 +113,6 @@ const Editor = ({
     try {
       // let formatted_code = format_SQL_code(schema);
       let formatted_schema = schema;
-
       return formatted_schema;
     }
     catch (error) {
@@ -123,7 +122,7 @@ const Editor = ({
     }
   }
 
-  const registerFunction = () => {
+  const registerFunction = async () => {
     // if (selectedOption === "latestBlockHeight") {
     //   setBlockHeight(await getLatestBlockHeight())
     // }
@@ -143,7 +142,7 @@ const Editor = ({
   };
 
   const handleReload = useCallback(async () => {
-    if (options?.create_new_indexer == true) {
+    if (options?.create_new_indexer === true) {
       // setIndexingCode(defaultCode);
       setSchema(defaultSchema);
       setShowResetCodeModel(false)
@@ -230,7 +229,7 @@ const Editor = ({
   async function submit() {
     // Handle Register button click
     await reformat()
-    registerFunction()
+    await registerFunction()
   }
 
   return (
