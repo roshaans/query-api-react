@@ -16,7 +16,7 @@ import {
   Nav,
 } from 'react-bootstrap';
 
-const defaultCode = `function getBlock(block, context) {
+const defaultCode = `async function getBlock(block, context) {
        
   // Add your code here   
   const h = block.header().height;
@@ -85,7 +85,7 @@ const Editor = ({
   const [schema, setSchema] = useState(defaultSchema);
   const [indexerNameField, setIndexerNameField] = useState(indexerName ?? "");
   const [selectedOption, setSelectedOption] = useState('latestBlockHeight');
-  // const [blockHeight, setBlockHeight] = useState(86256307);
+  const [blockHeight, setBlockHeight] = useState(86928994);
 
   // useEffect(() => {
   //   console.log("indexerName", indexerName)
@@ -140,7 +140,7 @@ const Editor = ({
     console.log("indexer code", indexingCode)
 
     // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innerCode, schema: formatted_schema }, from: "react" }, "*");
+    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innerCode, schema: formatted_schema, blockHeight: blockHeight }, from: "react" }, "*");
   };
 
   const handleReload = useCallback(async () => {
@@ -269,9 +269,9 @@ const Editor = ({
               <InputGroup className="px-3 pt-3">
                 <InputGroup.Checkbox value="latestBlockHeight" checked={selectedOption === "latestBlockHeight"}
                   onChange={handleOptionChange} aria-label="Checkbox for following text input" />
-                <InputGroup.Text>From Latest Block Height: </InputGroup.Text>
+                <InputGroup.Text>From Latest Block Height</InputGroup.Text>
               </InputGroup>
-              {/* <InputGroup className="px-3 pt-3">
+              <InputGroup className="px-3 pt-3">
                 <InputGroup.Checkbox value="specificBlockHeight" checked={selectedOption === "specificBlockHeight"}
                   onChange={handleOptionChange} aria-label="Checkbox for following text input" />
                 <InputGroup.Text>Specific Block Height</InputGroup.Text>
@@ -280,7 +280,7 @@ const Editor = ({
                   value={blockHeight}
                   onChange={(e) => setBlockHeight(e.target.value)}
                   aria-label="Text input with checkbox" />
-              </InputGroup> */}
+              </InputGroup>
 
             </>}
             <ButtonGroup className="px-3 pt-3" style={{ width: '50%' }} aria-label="Action Button Group">
@@ -314,10 +314,10 @@ const Editor = ({
         {error}
       </Alert>}
       <div className="px-3 pt-3">
-        <ToggleButtonGroup type="radio" name="options" defaultValue={"indexingLogic.js"}
+        <ToggleButtonGroup type="radio" style={{ backgroundColor: 'white' }} name="options" defaultValue={"indexingLogic.js"}
 
         >
-          <ToggleButton id="tbg-radio-1" value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
+          <ToggleButton id="tbg-radio-1" style={{ backgroundColor: 'gray' }} value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
             indexingLogic.js
           </ToggleButton>
           <ToggleButton id="tbg-radio-2" value={"schema.sql"} onClick={() => setFileName("schema.sql")}>
