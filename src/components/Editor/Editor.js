@@ -15,6 +15,7 @@ import {
   ToggleButton,
   Nav,
 } from 'react-bootstrap';
+import SqlPlugin from 'prettier-plugin-sql'
 
 const defaultCode = `async function getBlock(block, context) {
   // Add your code here   
@@ -105,15 +106,21 @@ const Editor = ({
   // }, [schema])
 
   const format_SQL_code = (schema) => {
-    return prettier.format(schema, {
+    const formattedSQL = prettier.format(schema, {
       parser: "sql",
-      plugins: [],
+      formatter: "node-sql-parser",
+      plugins: [SqlPlugin],
+      pluginSearchDirs: false,
+      language: 'postgresql',
+      database: 'postgresql',
     });
+    return formattedSQL;
+
   };
   const checkSQLSchemaFormatting = () => {
     try {
-      // let formatted_code = format_SQL_code(schema);
-      let formatted_schema = schema;
+      let formatted_code = format_SQL_code(schema);
+      let formatted_schema = formatted_code;
       return formatted_schema;
     }
     catch (error) {
@@ -145,7 +152,7 @@ const Editor = ({
   const handleReload = useCallback(async () => {
     if (options?.create_new_indexer === true) {
       // setIndexingCode(defaultCode);
-      setSchema(defaultSchema);
+      // setSchema(defaultSchema);
       setShowResetCodeModel(false)
       return
     }
@@ -208,15 +215,36 @@ const Editor = ({
   const reformat = () => {
     return new Promise((resolve, reject) => {
       try {
-        const formattedCode = prettier.format(indexingCode, {
-          parser: "babel",
-          plugins: [parserBabel],
-        });
-        setError(() => undefined);
-        setIndexingCode(formattedCode);
-        resolve(formattedCode);
+        if (fileName == "indexingLogic.js") {
+          const formattedCode = prettier.format(indexingCode, {
+            parser: "babel",
+            plugins: [parserBabel],
+          });
+          setError(() => undefined);
+          setIndexingCode(formattedCode);
+          resolve(formattedCode);
+        }
+        if (fileName == "schema.sql") {
+          const formattedSQL = prettier.format(schema, {
+            parser: "sql",
+            formatter: "node-sql-parser",
+            plugins: [SqlPlugin],
+            pluginSearchDirs: false,
+            language: 'postgresql',
+            database: 'postgresql',
+          });
+          setError(() => undefined);
+          setSchema(formattedSQL);
+          resolve(formattedSQL);
+        }
       } catch (error) {
-        setError(() => "Oh snap! We could not format your code. Make sure it is proper Javascript code.");
+        if (fileName == "indexingLogic.js") {
+          setError(() => "Oh snap! We could not format your code. Make sure it is proper Javascript code.");
+
+        }
+        if (fileName == "schema.sql") {
+          setError(() => "Oh snap! We could not format your SQL schema. Make sure it is proper SQL DDL");
+        }
         reject(error);
       }
     });
