@@ -17,7 +17,6 @@ import {
 } from 'react-bootstrap';
 
 const defaultCode = `async function getBlock(block, context) {
-       
   // Add your code here   
   const h = block.header().height;
   context.set('height', h);
@@ -177,7 +176,7 @@ const Editor = ({
   const format_querried_code = (code) => {
     code = code.replace(/(?:\\[n])+/g, "\r\n")
     let unformatted_code = `async function getBlock(block, context) {
-       ${code}
+      ${code}
     }`
     return unformatted_code;
     //! Not formatting code on query in case invalid code was submitted to registry which will crash the react app. 
@@ -345,7 +344,7 @@ const Editor = ({
             defaultLanguage="sql"
             theme="vs-dark"
             onChange={(text) => setSchema(text)}
-            options={{ ...options, readOnly: true }}
+            options={{ ...options, readOnly: options?.create_new_indexer === true ? false : true }}
           />
         }
       </div>
