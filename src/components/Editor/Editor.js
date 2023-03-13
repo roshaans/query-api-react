@@ -176,7 +176,7 @@ const Editor = ({
 
   const format_querried_code = (code) => {
     code = code.replace(/(?:\\[n])+/g, "\r\n")
-    let unformatted_code = `function getBlock(block, context) {
+    let unformatted_code = `async function getBlock(block, context) {
        ${code}
     }`
     return unformatted_code;
