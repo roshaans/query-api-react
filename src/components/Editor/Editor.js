@@ -19,7 +19,7 @@ import {
 const defaultCode = `async function getBlock(block, context) {
   // Add your code here   
   const h = block.header().height;
-  context.set('height', h);
+  await context.set('height', h);
 }`
 
 const defaultSchema = `
