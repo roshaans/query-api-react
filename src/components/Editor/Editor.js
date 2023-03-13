@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import MonacoEditor from '@monaco-editor/react';
+import MonacoEditor, { DiffEditor } from '@monaco-editor/react';
 import prettier from 'prettier';
 import parserBabel from 'prettier/parser-babel';
 import { providers } from 'near-api-js';
@@ -16,7 +16,7 @@ import {
   Nav,
 } from 'react-bootstrap';
 import SqlPlugin from 'prettier-plugin-sql'
-
+import Switch from "react-switch";
 const defaultCode = `async function getBlock(block, context) {
   // Add your code here   
   const h = block.header().height;
@@ -81,8 +81,12 @@ const Editor = ({
   const [error, setError] = useState(undefined);
   const [showResetCodeModel, setShowResetCodeModel] = useState(false);
   const [fileName, setFileName] = useState("indexingLogic.js");
+  const [originalSQLCode, setOriginalSQLCode] = useState(defaultSchema);
+  const [originalIndexingCode, setOriginalIndexingCode] = useState(defaultCode);
+
   const [indexingCode, setIndexingCode] = useState(defaultCode);
   const [schema, setSchema] = useState(defaultSchema);
+  const [diffView, setDiffView] = useState(false);
   const [indexerNameField, setIndexerNameField] = useState(indexerName ?? "");
   const [selectedOption, setSelectedOption] = useState('latestBlockHeight');
   const [blockHeight, setBlockHeight] = useState(86928994);
@@ -168,9 +172,11 @@ const Editor = ({
         let unformatted_indexing_code = format_querried_code(data.code);
         let unformatted_schema = data.schema;
         if (unformatted_indexing_code !== null) {
+          setOriginalIndexingCode(unformatted_indexing_code);
           setIndexingCode(unformatted_indexing_code);
         }
         if (unformatted_schema !== null) {
+          setOriginalSQLCode(unformatted_schema);
           setSchema(unformatted_schema);
         }
       }
@@ -265,6 +271,18 @@ const Editor = ({
     await registerFunction()
   }
 
+  function handleEditorMount(editor) {
+    const modifiedEditor = editor.getModifiedEditor();
+    modifiedEditor.onDidChangeModelContent((_) => {
+      console.log(modifiedEditor.getValue());
+      if (fileName == "indexingLogic.js") {
+        setIndexingCode(modifiedEditor.getValue());
+      }
+      if (fileName == "schema.sql") {
+        setSchema(modifiedEditor.getValue());
+      }
+    });
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
       {/* {loading && <h2> LOADING...</h2>} */}
@@ -344,7 +362,8 @@ const Editor = ({
       {error && <Alert className="px-3 pt-3" variant="danger">
         {error}
       </Alert>}
-      <div className="px-3 pt-3">
+
+      <div className="px-3">
         <ToggleButtonGroup type="radio" style={{ backgroundColor: 'white' }} name="options" defaultValue={"indexingLogic.js"}
 
         >
@@ -354,30 +373,70 @@ const Editor = ({
           <ToggleButton id="tbg-radio-2" style={{ backgroundColor: fileName === "indexingLogic.js" ? 'grey' : "blue", "borderRadius": "0px" }} value={"schema.sql"} onClick={() => setFileName("schema.sql")}>
             schema.sql
           </ToggleButton>
-        </ToggleButtonGroup>
+          <InputGroup className="px-3" style={{ width: '100%' }}>
+            <InputGroup >
+              <InputGroup.Text >Diff View:</InputGroup.Text>
+              <InputGroup.Text>  <Switch
+                checked={diffView}
+                onChange={(checked) => {
+                  setDiffView(checked)
+                }}
+              /></InputGroup.Text>
 
-        {fileName == "indexingLogic.js" &&
-          <MonacoEditor
-            value={indexingCode}
+
+            </InputGroup>
+          </InputGroup>
+        </ToggleButtonGroup>
+        {/* <ToggleButton id="tbg-radio-2" value={diffView} onClick={() => setDiffView((state) => !state)}>
+         
+        </ToggleButton> */}
+        {/* <ButtonGroup className="px-3 pt-3" style={{ width: '50%' }} aria-label="Action Button Group"> */}
+
+        {/* </ButtonGroup> */}
+
+        {fileName === "indexingLogic.js" && (
+          diffView === true ? <DiffEditor
+            original={originalIndexingCode}
+            modified={indexingCode}
             height="50vh"
             width="100%"
-            defaultValue={defaultCode}
-            defaultLanguage="javascript"
+            language="javascript"
             theme="vs-dark"
-            onChange={(text) => setIndexingCode(text)}
+            onMount={handleEditorMount}
+
             options={{ ...options, readOnly: false }}
-          />}
-        {fileName == "schema.sql" &&
-          <MonacoEditor
-            value={schema}
+          /> :
+            <MonacoEditor
+              value={indexingCode}
+              height="50vh"
+              width="100%"
+              defaultValue={defaultCode}
+              defaultLanguage="javascript"
+              theme="vs-dark"
+              onChange={(text) => setIndexingCode(text)}
+              options={{ ...options, readOnly: false }}
+            />)}
+        {fileName === "schema.sql" &&
+          (diffView === true ? <DiffEditor
+            original={originalSQLCode}
+            modified={schema}
             height="50vh"
             width="100%"
-            defaultValue={defaultSchema}
-            defaultLanguage="sql"
+            language="sql"
+            onMount={handleEditorMount}
             theme="vs-dark"
-            onChange={(text) => setSchema(text)}
             options={{ ...options, readOnly: options?.create_new_indexer === true ? false : true }}
-          />
+          /> :
+            <MonacoEditor
+              value={schema}
+              height="50vh"
+              width="100%"
+              defaultValue={defaultSchema}
+              defaultLanguage="sql"
+              theme="vs-dark"
+              onChange={(text) => setSchema(text)}
+              options={{ ...options, readOnly: options?.create_new_indexer === true ? false : true }}
+            />)
         }
       </div>
     </div >);
