@@ -317,10 +317,10 @@ const Editor = ({
         <ToggleButtonGroup type="radio" style={{ backgroundColor: 'white' }} name="options" defaultValue={"indexingLogic.js"}
 
         >
-          <ToggleButton id="tbg-radio-1" style={{ backgroundColor: 'gray' }} value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
+          <ToggleButton id="tbg-radio-1" style={{ backgroundColor: fileName === "indexingLogic.js" ? 'blue' : "grey", "borderRadius": "0px" }} value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
             indexingLogic.js
           </ToggleButton>
-          <ToggleButton id="tbg-radio-2" value={"schema.sql"} onClick={() => setFileName("schema.sql")}>
+          <ToggleButton id="tbg-radio-2" style={{ backgroundColor: fileName === "indexingLogic.js" ? 'grey' : "blue", "borderRadius": "0px" }} value={"schema.sql"} onClick={() => setFileName("schema.sql")}>
             schema.sql
           </ToggleButton>
         </ToggleButtonGroup>
