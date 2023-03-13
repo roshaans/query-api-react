@@ -113,6 +113,8 @@ const Editor = ({
       pluginSearchDirs: false,
       language: 'postgresql',
       database: 'postgresql',
+      newlineBeforeSemicolon: true,
+
     });
     return formattedSQL;
 
@@ -232,6 +234,8 @@ const Editor = ({
             pluginSearchDirs: false,
             language: 'postgresql',
             database: 'postgresql',
+            newlineBeforeSemicolon: true,
+
           });
           setError(() => undefined);
           setSchema(formattedSQL);
