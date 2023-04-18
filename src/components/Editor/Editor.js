@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import MonacoEditor, { DiffEditor } from '@monaco-editor/react';
 import { formatSQL, formatIndexingCode } from '../../utils/formatters';
-import { queryIndexerFunctionDetails, queryIndexerFunctionDetails_deprecated } from '../../utils/queryIndexerFunction';
+import { queryIndexerFunctionDetails } from '../../utils/queryIndexerFunction';
 import {
   Button,
   Alert,
@@ -12,7 +12,6 @@ import {
   InputGroup,
   ToggleButtonGroup,
   ToggleButton,
-  Nav,
 } from 'react-bootstrap';
 import Switch from "react-switch";
 import primitives from '!!raw-loader!../../../primitives.d.ts';
@@ -24,9 +23,11 @@ const defaultCode = formatIndexingCode(`
   await context.set('height', h);
 `, true);
 
+import { request, useInitialPayload } from 'near-social-bridge'
 const defaultSchema = `
 CREATE TABLE "indexer_storage" ("function_name" TEXT NOT NULL, "key_name" TEXT NOT NULL, "value" TEXT NOT NULL, PRIMARY KEY ("function_name", "key_name"))
 `
+const BLOCKHEIGHT_LIMIT = 3600
 
 const Editor = ({
   options,
@@ -37,6 +38,7 @@ const Editor = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(undefined);
+  const [blockHeightError, setBlockHeightError] = useState(undefined);
   const [showResetCodeModel, setShowResetCodeModel] = useState(false);
   const [fileName, setFileName] = useState("indexingLogic.js");
   const [originalSQLCode, setOriginalSQLCode] = useState(defaultSchema);
@@ -47,12 +49,34 @@ const Editor = ({
   const [diffView, setDiffView] = useState(false);
   const [indexerNameField, setIndexerNameField] = useState(indexerName ?? "");
   const [selectedOption, setSelectedOption] = useState('latestBlockHeight');
-  const [blockHeight, setBlockHeight] = useState(86928994);
-  const [playgroundLink, setPlaygroundLink] = useState()
+  const [blockHeight, setBlockHeight] = useState(null);
+
+  const { height } = useInitialPayload()
+
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
+    setBlockHeightError(null)
   }
 
+
+  useEffect(() => {
+    if (selectedOption == "latestBlockHeight") {
+      setBlockHeightError(null)
+      return
+    }
+
+    if (height - blockHeight > BLOCKHEIGHT_LIMIT) {
+      setBlockHeightError(`Warning: Please enter a valid start block height. At the moment we only support historical indexing of the last ${BLOCKHEIGHT_LIMIT} blocks or ${BLOCKHEIGHT_LIMIT / 3600} hrs.
+
+                Choose a start block height between ${height - BLOCKHEIGHT_LIMIT} - ${height}.`)
+    }
+    else if (blockHeight > height) {
+      setBlockHeightError(`Warning: Start Block Hieght can not be in the future. Please choose a value between ${height - BLOCKHEIGHT_LIMIT} - ${height}.`)
+    } else {
+      setBlockHeightError(null)
+    }
+  }
+    , [blockHeight, selectedOption])
 
   const checkSQLSchemaFormatting = () => {
     try {
@@ -67,28 +91,23 @@ const Editor = ({
     }
   }
 
-  const registerFunction = async () => {
-    // if (selectedOption === "latestBlockHeight") {
-    //   setBlockHeight(await getLatestBlockHeight())
-    // }
 
+  const registerFunction = async () => {
     let formatted_schema = checkSQLSchemaFormatting();
+
     const innerCode = indexingCode.match(/getBlock\s*\([^)]*\)\s*{([\s\S]*)}/)[1]
     if (indexerNameField == undefined || formatted_schema == undefined) {
       setError(() => "Please check your SQL schema formatting and specify an Indexer Name");
       return
     }
     setError(() => undefined);
-    // Send a message to other sources
-    window.parent.postMessage({ action: "register_function", value: { indexerName: indexerNameField.replace(" ", "_"), code: innerCode, schema: formatted_schema, blockHeight: blockHeight }, from: "react" }, "*");
-  };
-
-  useEffect(() => {
-    if (options.create_new_indexer === false) {
-
-      setPlaygroundLink(generatePlaygroundLink())
+    let start_block_height = blockHeight
+    if (selectedOption == "latestBlockHeight") {
+      start_block_height = null
     }
-  }, [schema])
+    // Send a message to other sources
+    request('register-function', { indexerName: indexerNameField.replaceAll(" ", "_"), code: innerCode, schema: formatted_schema, blockHeight: start_block_height });
+  };
 
   const handleReload = useCallback(async () => {
     if (options?.create_new_indexer === true) {
@@ -98,8 +117,7 @@ const Editor = ({
       return
     }
 
-    let data = await queryIndexerFunctionDetails(accountId, indexerNameField)
-
+    const data = await queryIndexerFunctionDetails(accountId, indexerNameField)
     if (data == null) {
       setIndexingCode(defaultCode);
       setSchema(defaultSchema);
@@ -115,6 +133,10 @@ const Editor = ({
         if (unformatted_schema !== null) {
           setOriginalSQLCode(unformatted_schema);
           setSchema(unformatted_schema);
+        }
+        if (data.start_block_height) {
+          setSelectedOption("specificBlockHeight")
+          setBlockHeight(data.start_block_height)
         }
       }
       catch (error) {
@@ -205,58 +227,13 @@ const Editor = ({
     );
   }
 
-  function generateGraphQLQuery(accountName, indexerName) {
-    const tableRegex = /CREATE TABLE "([^"]+)"\s*\(([^)]+)\)/g;
-    const fieldRegex = /"([^"]+)"\s+([A-Za-z]+)/g;
-
-    let tableMatches;
-    const tables = {};
-
-    while ((tableMatches = tableRegex.exec(schema)) !== null) {
-      const tableName = tableMatches[1];
-      const fieldList = tableMatches[2];
-
-      let fieldMatches;
-      const fields = {};
-
-      while ((fieldMatches = fieldRegex.exec(fieldList)) !== null) {
-        const fieldName = fieldMatches[1];
-        const fieldType = fieldMatches[2];
-        fields[fieldName] = fieldType;
-      }
-
-      tables[tableName] = fields;
-    }
-
-    const queryParts = [];
-    const accountNamePrefix = accountName.replaceAll('.', '_');
-    const indexerNamePrefix = indexerName.replaceAll('-', '_');
-
-    for (const tableName in tables) {
-      const prefixedTableName = `${accountNamePrefix}_${indexerNamePrefix}_${tableName}`;
-      const fieldNames = Object.keys(tables[tableName]).join(', ');
-      queryParts.push(`${prefixedTableName} { ${fieldNames} }`);
-    }
-
-    return `query { ${queryParts.join(', ')} }`;
-  }
-
-  function generatePlaygroundLink() {
-    let endpoint = `https://cloud.hasura.io/public/graphiql?endpoint=https%3A%2F%2Fquery-api-hasura-vcqilefdcq-uc.a.run.app%2Fv1%2Fgraphql`
-    endpoint += `&header=x-hasura-role%3A${accountId.replaceAll('.', '_')}`
-    return endpoint + "&query=" + encodeURIComponent(generateGraphQLQuery(accountId, indexerName))
-    // window.parent.postMessage({ action: "view_playground", value: { indexerName: indexerNameField.replace(" ", "_"), link: endpoint + "&query=" + encodeURIComponent(generateGraphQLQuery(accountId, indexerName)) }, from: "react" }, "*");
-  }
-
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
       {
         <>
           <ButtonToolbar className="pt-3 pb-1 flex-col" aria-label="Actions for Editor">
             <IndexerDetailsGroup accountId={accountId} indexerNameField={indexerNameField} setIndexerNameField={setIndexerNameField} isCreateNewIndexerPage={options.create_new_indexer} />
-            {options?.create_new_indexer && <>
-              <BlockHeightOptions selectedOption={selectedOption} handleOptionChange={handleOptionChange} blockHeight={blockHeight} setBlockHeight={setBlockHeight} />
-            </>}
+            <BlockHeightOptions selectedOption={selectedOption} handleOptionChange={handleOptionChange} blockHeight={blockHeight} setBlockHeight={setBlockHeight} />
             <ButtonGroup className="px-3 pt-3" style={{ width: '100%' }} aria-label="Action Button Group">
               <Button variant="secondary" className="px-3" onClick={() => setShowResetCodeModel(true)}> Reset</Button>{' '}
               <Button variant="secondary" className="px-3" onClick={() => handleFormating()}> Format Code</Button>{' '}
@@ -265,19 +242,6 @@ const Editor = ({
               </Button>
 
             </ButtonGroup>
-            {
-              options?.create_new_indexer === false &&
-              <InputGroup style={{ width: "100%", padding: "10px" }}>
-                <InputGroup.Text id="btnGroupAddon">GraphQL Playground:</InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  value={playgroundLink}
-                  disabled={true}
-                  aria-label="Graph QL Playground Link"
-                  aria-describedby="btnGroupAddon"
-                />
-              </InputGroup>
-            }
           </ButtonToolbar></>}
       <Modal show={showResetCodeModel} onHide={() => setShowResetCodeModel(false)}>
         <Modal.Header closeButton>
@@ -296,11 +260,15 @@ const Editor = ({
         </Modal.Footer>
       </Modal>
 
-      {error && <Alert className="px-3 pt-3" variant="danger">
-        {error}
-      </Alert>}
 
       <div className="px-3" style={{ "flex": "display", justifyContent: "space-around", "width": "100%" }}>
+        {error && <Alert className="px-3 pt-3" variant="danger">
+          {error}
+        </Alert>}
+        {blockHeightError && <Alert className="px-3 pt-3" variant="danger">
+          {blockHeightError}
+        </Alert>}
+
         <ToggleButtonGroup type="radio" style={{ backgroundColor: 'white' }} name="options" defaultValue={"indexingLogic.js"}
         >
           <ToggleButton id="tbg-radio-1" style={{ backgroundColor: fileName === "indexingLogic.js" ? 'blue' : "grey", "borderRadius": "0px" }} value={"indexingLogic.js"} onClick={() => setFileName("indexingLogic.js")}>
@@ -377,6 +345,6 @@ const Editor = ({
             />
           ))}
       </div>
-    </div>);
+    </div>)
 }
 export default Editor;
