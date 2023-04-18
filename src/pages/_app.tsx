@@ -7,6 +7,6 @@ import { NearSocialBridgeProvider } from 'near-social-bridge'
 export default function App({ Component, pageProps }: AppProps) {
   return (<NearSocialBridgeProvider fallback={<Spinner />}>
 
-    <Component {...pageProps} />;
+    <Component {...pageProps} />
   </NearSocialBridgeProvider>)
 }
