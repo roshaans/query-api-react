@@ -1,22 +1,22 @@
 FROM node:16-alpine as dependencies
-WORKDIR /frontend
+WORKDIR ./
 COPY package.json yarn.lock ./
 RUN npm install 
 
 FROM node:16-alpine as builder
-WORKDIR /frontend
+WORKDIR ./
 COPY . .
-COPY --from=dependencies /frontend/node_modules ./node_modules
+COPY --from=dependencies ./node_modules ./node_modules
 RUN npm run build
 
 FROM node:16-alpine as runner
-WORKDIR /frontend
+WORKDIR ./
 ENV NODE_ENV production
 
-COPY --from=builder /frontend/public ./public
-COPY --from=builder /frontend/.next ./.next
-COPY --from=builder /frontend/node_modules ./node_modules
-COPY --from=builder /frontend/package.json ./package.json
+COPY --from=builder ./public ./public
+COPY --from=builder ./.next ./.next
+COPY --from=builder ./node_modules ./node_modules
+COPY --from=builder ./package.json ./package.json
 
 EXPOSE 3000
 CMD ["npm", "run","start"]
